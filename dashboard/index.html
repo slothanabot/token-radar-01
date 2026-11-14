@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="radar-dot" aria-hidden="true"></span><span class="brand-name">TOKEN RADAR</span><span class="brand-sub">pre-token protocols, ranked by implied value</span></div>
+  <div class="asof" id="asof"></div>
+</header>
+<main id="board" tabindex="-1">
+  <section class="stats" id="stats" aria-label="Board summary"></section>
+  <nav class="tabs" aria-label="Views">
+    <button type="button" class="tab active" data-tab="board">Board</button>
+    <button type="button" class="tab" data-tab="live">Live tokens</button>
+    <button type="button" class="tab" data-tab="model">Model</button>
+  </nav>
+  <section id="view-board" class="view">
+    <div class="controls">
+      <label class="ctl">Search <input id="q" type="search" placeholder="name or slug" autocomplete="off"></label>
+      <label class="ctl">Category <select id="f-category"><option value="">All categories</option></select></label>
+      <label class="ctl">Chain <select id="f-chain"><option value="">All chains</option></select></label>
+      <label class="ctl">Min TVL <select id="f-tvl"><option value="0" selected>Any</option><option value="5000000">$5M</option><option value="50000000">$50M</option><option value="500000000">$500M</option><option value="1000000000">$1B</option></select></label>
+      <label class="ctl">Scope <select id="f-scope"><option value="all" selected>Watchlist + early</option><option value="watchlist">Watchlist only</option><option value="early">Early only</option></select></label>
+      <label class="ctl">Sort <select id="f-sort"><option value="implied" selected>Implied value</option><option value="tvl">TVL</option><option value="growth">7d growth</option><option value="age">Age</option><option value="name">Name</option></select></label>
+      <button type="button" class="btn" id="f-reset">Reset</button>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="tablewrap">
+      <table id="board-table">
+        <thead><tr>
+          <th data-sort="rank">#</th><th data-sort="name">Protocol</th><th data-sort="category">Category</th><th>Chains</th>
+          <th data-sort="tvl">TVL</th><th data-sort="growth">7d</th><th data-sort="age">Age</th>
+          <th data-sort="implied">Implied value</th><th>Multiple</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="pager"><button type="button" class="btn" id="prev">← Prev</button><span id="pageinfo"></span><button type="button" class="btn" id="next">Next →</button></div>
+    <p class="hint">Click a row for its detail view: model breakdown, comparables and the farm plan. Implied value is the entry's own claim, from the snapshot's figures alone.</p>
+  </section>
+  <section id="view-live" class="view" hidden>
+    <p class="lede">These protocols already trade. Their market caps are the market's own values — and the comparables the board's multiples are priced from. They are never ranked on the board.</p>
+    <div class="tablewrap"><table id="live-table">
+      <thead><tr><th>#</th><th>Protocol</th><th>Category</th><th>Chains</th><th>TVL</th><th>Market cap</th><th>Mcap / TVL</th><th>7d</th></tr></thead>
+      <tbody id="live-rows"></tbody>
+    </table></div>
+  </section>
+  <section id="view-model" class="view" hidden>
+    <h2>How the implied value is priced</h2>
+    <p class="lede">No name is ever special-cased. Every row is priced from the snapshot's own figures by the same function, radar-2:</p>
+    <ol class="formula">
+      <li><b>Comparable multiple.</b> For the protocol's category, the median market-cap-to-TVL ratio of the live-token protocols in that category. Thin categories shrink toward the global median (prior 5). Clamped to 0.02–1.50.</li>
+      <li><b>Base</b> = TVL × multiple.</li>
+      <li><b>Growth</b> = 1 + clamp(7d change, −60%, +120%) × 0.5.</li>
+      <li><b>Maturity</b> = 0.6 + min(age, 1095 days) ÷ 1095 × 0.4. Unknown age counts as 365 days.</li>
+      <li><b>Breadth</b> = 1 + 0.05 × extra chains, up to 1.20. More chains, wider distribution.</li>
+      <li><b>Implied value</b> = base × growth × maturity × breadth, rounded to whole dollars.</li>
+    </ol>
+    <h3>Category multiples from live comparables</h3>
+    <div class="tablewrap"><table id="comp-table">
+      <thead><tr><th>Category</th><th>Live comparables</th><th>Category median</th><th>Multiple used</th></tr></thead>
+      <tbody id="comp-rows"></tbody>
+    </table></div>
+    <p class="hint">A protocol records no token when its DefiLlama record carries no market cap, no CoinGecko id and no symbol. That is a record, not proof: a protocol on the board may still hold a token its record does not carry.</p>
+  </section>
+  <aside id="detail" class="detail" hidden aria-label="Protocol detail"></aside>
+</main>
+<footer class="foot"><span id="foot-source"></span><span>Token Radar · radar-2 · built for make.fun token-radar-01</span></footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
